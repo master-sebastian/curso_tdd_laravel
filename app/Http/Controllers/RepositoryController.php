@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Repository;
 use Illuminate\Http\Request;
 
 class RepositoryController extends Controller
 {
     /**
-     * @param Request $request Solcitud del servidor
+     * @param Request $request Solcitud de un cliente que quiere crear un registro
      * @return redirect Retorna a una ruta especificada dentro de este metodo
      */
     public function store(Request $request)
@@ -15,5 +16,15 @@ class RepositoryController extends Controller
         $request->user()->repositories()->create($request->all());
 
         return redirect()->route('repositories.index');
+    }
+    /**
+     * @param Request $request Solcitud de un cliente que quiere modificar un registro
+     * @return redirect Retorna a una ruta especificada dentro de este metodo
+     */
+    public function update(Request $request, Repository $repository)
+    {
+        $repository->update($request->all());
+
+        return redirect()->route('repositories.edit', $repository);
     }
 }
