@@ -40,21 +40,20 @@ class RepositoryControllerTest extends TestCase
 
     public function test_update()
     {
-        $repository = Repository::factory()->create();
+        $user = User::factory()->create(); // id = 1
+        $repository = Repository::factory()->create(); // user_id = 2
+
         $data = [
             'url' => $this->faker->url,
             'description' => $this->faker->text,
         ];
 
-        $user = User::factory()->create();
-
         $this
             ->actingAs($user)
             ->put("repositories/$repository->id", $data)
-            ->assertRedirect("repositories/$repository->id/edit");
-
-        $this->assertDatabaseHas('repositories', $data);
+            ->assertStatus(403);
     }
+
     public function test_validate_store()
     {
         $user = User::factory()->create();
@@ -76,5 +75,78 @@ class RepositoryControllerTest extends TestCase
             ->put("repositories/$repository->id", [])
             ->assertStatus(302)
             ->assertSessionHasErrors(['url', 'description']);
+    }
+
+    public function test_destroy()
+    {
+        $user = User::factory()->create();
+        $repository = Repository::factory()->create(['user_id' => $user->id]);
+
+        $this
+            ->actingAs($user)
+            ->delete("repositories/$repository->id")
+            ->assertRedirect('repositories');
+
+        $this->assertDatabaseMissing('repositories', [
+            'id' => $repository->id,
+            'url' => $repository->url,
+            'description' => $repository->description,
+        ]); 
+    }
+    public function test_update_policy()
+    {
+        $user = User::factory()->create(); // id = 1
+        $repository = Repository::factory()->create(); // user_id = 2
+
+        $data = [
+            'url' => $this->faker->url,
+            'description' => $this->faker->text,
+        ];
+
+        $this
+            ->actingAs($user)
+            ->put("repositories/$repository->id", $data)
+            ->assertStatus(403);
+    }
+    public function test_delete_policy()
+    {
+        $user = User::factory()->create(); // id = 1
+        $repository = Repository::factory()->create(); // user_id = 2
+
+        $data = [
+            'url' => $this->faker->url,
+            'description' => $this->faker->text,
+        ];
+
+        $this
+            ->actingAs($user)
+            ->delete("repositories/$repository->id", $data)
+            ->assertStatus(403);
+    }
+
+    public function test_index_empty()
+    {
+        Repository::factory()->create(); // user_id = 1
+
+        $user = User::factory()->create(); // id = 2
+
+        $this
+            ->actingAs($user)
+            ->get('repositories')
+            ->assertStatus(200)
+            ->assertSee('No hay repositorios creados');
+    }
+
+    public function test_index_with_data()
+    {
+        $user = User::factory()->create(); // id = 1
+        $repository = Repository::factory()->create(['user_id' => $user->id]); // user_id = 1
+
+        $this
+            ->actingAs($user)
+            ->get('repositories')
+            ->assertStatus(200)
+            ->assertSee($repository->id)
+            ->assertSee($repository->url);
     }
 }
