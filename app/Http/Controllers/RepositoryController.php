@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Repository;
-use Illuminate\Http\Request;
 use App\Http\Requests\RepositoryRequest;
 /**
  *  Este controlador tiene las funcionalidad respetivas para efectuar un crud completo
@@ -37,11 +36,9 @@ class RepositoryController extends Controller
      * @param Repository $repository objeto del modelo repositorio
      * @return vieew Renderiza una vista
      */
-    public function edit(Request $request, Repository $repository)
+    public function edit(Repository $repository)
     {
-        if ($request->user()->id != $repository->user_id) {
-            abort(403);
-        }
+        $this->authorize('pass', $repository);
 
         return view('repositories.edit', compact('repository'));
     }
@@ -55,9 +52,8 @@ class RepositoryController extends Controller
      */
     public function update(RepositoryRequest $request, Repository $repository)
     {
-        if ($request->user()->id != $repository->user_id) {
-            abort(403);
-        }
+        $this->authorize('pass', $repository);
+
         $repository->update($request->all());
 
         return redirect()->route('repositories.edit', $repository);
@@ -69,11 +65,10 @@ class RepositoryController extends Controller
      * @param Repository $repository objeto del modelo repositorio
      * @return redirect Retorna a una ruta especificada dentro de este metodo
      */
-    public function destroy(Request $request, Repository $repository)
+    public function destroy(Repository $repository)
     {
-        if ($request->user()->id != $repository->user_id) {
-            abort(403);
-        }
+        $this->authorize('pass', $repository);
+
         $repository->delete();
 
         return redirect()->route('repositories.index');
@@ -84,10 +79,10 @@ class RepositoryController extends Controller
      * @param Request $request objeto request
      * @return View carga una vista
      */
-    public function index(Request $request)
+    public function index()
     {
         return view('repositories.index', [
-            'repositories' => $request->user()->repositories
+            'repositories' => auth()->user()->repositories
         ]);
     }
     
@@ -96,11 +91,10 @@ class RepositoryController extends Controller
      * @param Request $request objeto request
      * @return View carga una vista
      */
-    public function show(Request $request, Repository $repository)
+    public function show(Repository $repository)
     {
-        if ($request->user()->id != $repository->user_id) {
-            abort(403);
-        }
+        $this->authorize('pass', $repository);
+
         return view('repositories.show', compact('repository'));
     }
 }
