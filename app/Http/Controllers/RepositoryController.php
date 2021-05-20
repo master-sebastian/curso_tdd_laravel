@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Repository;
 use Illuminate\Http\Request;
-
+/**
+ *  Este controlador tiene las funcionalidad respetivas para efectuar un crud completo
+ */
 class RepositoryController extends Controller
 {
+    
     /** 
-     * @param Request $request Solcitud de un cliente que quiere crear un registro
-     * @return redirect Retorna a una ruta especificada dentro de este metodo
+     * Crear un nuevo repositorio considerando el usuario que se invocucra en el request
+     * @param Request $request Objeto request
+     * @return redirect Rediecciona a una ruta especificada dentro de este metodo
      */
     public function store(Request $request)
     {
@@ -21,10 +25,13 @@ class RepositoryController extends Controller
 
         return redirect()->route('repositories.index');
     }
+    
     /**
-     * @param Request $request Solcitud de un cliente que quiere modificar un registro
-     * @param Repository $repository Data de registro a actualizar
-     * @return redirect Retorna a una ruta especificada dentro de este metodo
+     * Permite modificar la informacion de forma completa del repositorio considerando que le debe pertenecer al usuario
+     * para efectuar su respectiva modificacion
+     * @param Request $request objeto request
+     * @param Repository $repository objeto del modelo repositorio
+     * @return redirect Redirecciona a una ruta especificada dentro de este metodo
      */
     public function update(Request $request, Repository $repository)
     {
@@ -41,8 +48,9 @@ class RepositoryController extends Controller
     }
 
     /**
-     * @param Request $request Solcitud de un cliente que quiere eliminar un registro
-     * @param Repository $repository Data de registro a actualizar
+     * Se utiliza para eliminar un repositorio que le pertenezca a un usuario especifico
+     * @param Request $request objeto request
+     * @param Repository $repository objeto del modelo repositorio
      * @return redirect Retorna a una ruta especificada dentro de este metodo
      */
     public function destroy(Request $request, Repository $repository)
@@ -54,10 +62,29 @@ class RepositoryController extends Controller
 
         return redirect()->route('repositories.index');
     }
+    
+    /**
+     * Se utiliza para listar todos los repositorios que le pertenezcan
+     * @param Request $request objeto request
+     * @return View carga una vista
+     */
     public function index(Request $request)
     {
         return view('repositories.index', [
             'repositories' => $request->user()->repositories
         ]);
+    }
+    
+    /**
+     * Se utiliza para ver un repositorio espeficio que le pertezca a un usuario puntual
+     * @param Request $request objeto request
+     * @return View carga una vista
+     */
+    public function show(Request $request, Repository $repository)
+    {
+        if ($request->user()->id != $repository->user_id) {
+            abort(403);
+        }
+        return view('repositories.show', compact('repository'));
     }
 }
