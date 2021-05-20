@@ -9,6 +9,14 @@ use Illuminate\Http\Request;
  */
 class RepositoryController extends Controller
 {
+    /**
+     * Permite cargar la vista para creacion de repositorios
+     * @return vieew Renderiza una vista
+     */
+    public function create()
+    {
+        return view('repositories.create');
+    }
     
     /** 
      * Crear un nuevo repositorio considerando el usuario que se invocucra en el request
@@ -37,7 +45,7 @@ class RepositoryController extends Controller
         if ($request->user()->id != $repository->user_id) {
             abort(403);
         }
-        
+
         return view('repositories.edit', compact('repository'));
     }
 
