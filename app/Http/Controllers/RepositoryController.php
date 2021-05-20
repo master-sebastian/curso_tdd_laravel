@@ -25,7 +25,22 @@ class RepositoryController extends Controller
 
         return redirect()->route('repositories.index');
     }
-    
+    /**
+     * Permite cargar la vista para modificar la informacion de forma completa del repositorio considerando que le debe pertenecer al usuario
+     * para efectuar su respectiva modificacion
+     * @param Request $request objeto request
+     * @param Repository $repository objeto del modelo repositorio
+     * @return vieew Renderiza una vista
+     */
+    public function edit(Request $request, Repository $repository)
+    {
+        if ($request->user()->id != $repository->user_id) {
+            abort(403);
+        }
+        
+        return view('repositories.edit', compact('repository'));
+    }
+
     /**
      * Permite modificar la informacion de forma completa del repositorio considerando que le debe pertenecer al usuario
      * para efectuar su respectiva modificacion
